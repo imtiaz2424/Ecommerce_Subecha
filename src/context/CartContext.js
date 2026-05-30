@@ -1,12 +1,36 @@
 "use client";
 
-import { createContext, useState } from "react";
+import {
+  createContext,
+  useState,
+  useEffect,
+} from "react";
 
 export const CartContext = createContext();
 
 export default function CartProvider({ children }) {
 
-  const [cart, setCart] = useState([]);
+const [cart, setCart] = useState([]);
+useEffect(() => {
+
+  const savedCart =
+    localStorage.getItem("cart");
+
+  if (savedCart) {
+    setCart(JSON.parse(savedCart));
+  }
+
+}, []);
+
+
+useEffect(() => {
+
+  localStorage.setItem(
+    "cart",
+    JSON.stringify(cart)
+  );
+
+}, [cart]);
 
   // Add To Cart
 
@@ -87,6 +111,10 @@ export default function CartProvider({ children }) {
     );
   };
 
+  const clearCart = () => {
+  setCart([]);
+  };
+
   return (
     <CartContext.Provider
       value={{
@@ -95,6 +123,7 @@ export default function CartProvider({ children }) {
         removeFromCart,
         increaseQuantity,
         decreaseQuantity,
+        clearCart,
       }}
     >
       {children}

@@ -1,21 +1,31 @@
 "use client";
 
 import Link from "next/link";
-import { useContext, useState } from "react";
+import {
+  useContext,
+  useState,
+  useEffect,
+} from "react";
 import { CartContext } from "../context/CartContext";
 import products from "../data/products";
 import { AuthContext } from "../context/AuthContext";
+
 
 export default function Home() {
 
   const { cart } = useContext(CartContext);
   const { user } = useContext(AuthContext);
   const [search, setSearch] = useState("");
+  const [mounted, setMounted] = useState(false);
+    useEffect(() => {
+      setMounted(true);
+    }, []);
   const filteredProducts = products.filter((product) =>
   product.name
     .toLowerCase()
     .includes(search.toLowerCase())
     );
+  
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -67,7 +77,7 @@ export default function Home() {
             </Link>
 
             <Link
-              href="/"
+              href="/wishlist"
               className="hover:text-violet-600 transition"
             >
               Wishlist
@@ -77,7 +87,7 @@ export default function Home() {
               href="/cart"
               className="hover:text-violet-600 transition"
             >
-              Cart ({cart.length})
+              Cart ({mounted ? cart.length : 0})
             </Link>
 
             {user ? (

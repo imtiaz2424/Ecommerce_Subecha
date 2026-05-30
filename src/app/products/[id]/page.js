@@ -5,6 +5,8 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { CartContext } from "../../../context/CartContext";
 import products from "../../../data/products";
+import {  WishlistContext} from "../../../context/WishlistContext";
+
 
 export default function ProductDetails() {
 
@@ -14,6 +16,18 @@ export default function ProductDetails() {
 
   const product = products.find(
     (item) => item.id == params.id
+  );
+  const {
+  wishlist,
+  toggleWishlist,
+} = useContext(
+  WishlistContext
+);
+
+const isWishlisted =
+  wishlist.find(
+    (item) =>
+      item.id === product.id
   );
 
   if (!product) {
@@ -90,6 +104,17 @@ export default function ProductDetails() {
                 className="bg-black text-white px-10 py-5 rounded-2xl text-xl font-bold hover:bg-gray-800 transition"
               >
                 Add To Cart
+              </button>
+
+              <button
+                onClick={() =>
+                  toggleWishlist(product)
+                }
+                className="w-full mt-4 border-2 border-violet-500 text-violet-500 py-4 rounded-2xl font-bold hover:bg-violet-500 hover:text-white transition"
+              >
+                {isWishlisted
+                  ? "❤️ Remove From Wishlist"
+                  : "🤍 Add To Wishlist"}
               </button>
 
               <Link

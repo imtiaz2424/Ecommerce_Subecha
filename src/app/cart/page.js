@@ -11,6 +11,7 @@ export default function CartPage() {
   removeFromCart,
   increaseQuantity,
   decreaseQuantity,
+  clearCart,
 } = useContext(CartContext);
 
   const totalPrice = cart.reduce(
@@ -217,6 +218,13 @@ export default function CartPage() {
                   </p>
 
                 </div>
+
+                <button
+                  onClick={clearCart}
+                  className="w-full mb-4 bg-red-500 text-white py-4 rounded-2xl font-bold hover:bg-red-600"
+                >
+                  Clear Cart
+                </button>
 
                 <Link
                   href="/checkout"

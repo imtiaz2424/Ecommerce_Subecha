@@ -3,15 +3,19 @@
 import { useContext } from "react";
 import Link from "next/link";
 import { CartContext } from "../../context/CartContext";
+import { OrderContext } from "../../context/OrderContext";
 
 export default function CheckoutPage() {
 
   const { cart } = useContext(CartContext);
 
   const totalPrice = cart.reduce(
-    (total, item) => total + item.price,
-    0
-  );
+  (total, item) =>
+    total + item.price * item.quantity,
+  0
+);
+  const { clearCart } = useContext(CartContext);
+  const { addOrder } = useContext(OrderContext);
 
   return (
     <main className="min-h-screen bg-gray-100 py-16 px-6">
@@ -71,8 +75,28 @@ export default function CheckoutPage() {
             </div>
 
             <button
-              type="submit"
-              className="w-full bg-black text-white py-5 rounded-2xl text-xl font-bold hover:bg-gray-800 transition"
+              type="button"
+              onClick={() => {
+
+                const newOrder = {
+                  id: Date.now(),
+                  date:
+                    new Date().toLocaleDateString(),
+                  items: cart,
+                  total: totalPrice,
+                  status: "Pending",
+                };
+
+                addOrder(newOrder);
+
+                clearCart();
+
+                alert(
+                  "Order Placed Successfully!"
+                );
+
+              }}
+              className="w-full bg-black text-white py-4 rounded-2xl text-xl font-bold"
             >
               Place Order
             </button>

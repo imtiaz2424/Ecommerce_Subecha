@@ -214,6 +214,7 @@ export default function ProfilePage() {
               >
                 Home
               </Link>
+              
 
             </div>
 
@@ -334,8 +335,15 @@ export default function ProfilePage() {
               </div>
 
               <Link
+                href="/orders"
+                className="block bg-violet-600 text-white text-center px-6 py-4 rounded-2xl font-bold hover:bg-violet-400 hover:text-black transition"
+              >
+                My Orders
+              </Link>
+
+              <Link
                 href="/"
-                className="bg-gray-200 px-6 py-4 rounded-2xl font-semibold hover:bg-gray-300 transition"
+                className="bg-gray-200 px-6 py-4 rounded-2xl font-bold hover:bg-gray-300 transition"
               >
                 Shop More
               </Link>
