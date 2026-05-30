@@ -6,13 +6,18 @@ import { CartContext } from "../../context/CartContext";
 
 export default function CartPage() {
 
-  const { cart, removeFromCart } =
-    useContext(CartContext);
+  const {
+  cart,
+  removeFromCart,
+  increaseQuantity,
+  decreaseQuantity,
+} = useContext(CartContext);
 
   const totalPrice = cart.reduce(
-    (total, item) => total + item.price,
-    0
-  );
+  (total, item) =>
+    total + item.price * item.quantity,
+  0
+);
 
   return (
     <main className="min-h-screen bg-gray-100 py-16 px-6">
@@ -105,7 +110,7 @@ export default function CartPage() {
                       </div>
 
                       <button
-                        onClick={() => removeFromCart(index)}
+                        onClick={() => removeFromCart(item.id)}
                         className="bg-red-500 text-white px-5 py-3 rounded-xl hover:bg-red-600 transition"
                       >
                         Remove
@@ -115,12 +120,42 @@ export default function CartPage() {
 
                     <div className="flex justify-between items-center mt-8">
 
-                      <p className="text-4xl font-black">
-                        ${item.price}
-                      </p>
+                     <div>
 
-                      <div className="bg-gray-100 px-5 py-3 rounded-xl">
-                        Qty: 1
+                        <p className="text-gray-500">
+                          ${item.price} × {item.quantity}
+                        </p>
+
+                        <p className="text-4xl font-black">
+                          ${item.price * item.quantity}
+                        </p>
+
+                      </div>
+
+                      <div className="flex items-center gap-3">
+
+                          <button
+                            onClick={() =>
+                              decreaseQuantity(item.id)
+                            }
+                            className="w-10 h-10 bg-gray-200 rounded-lg text-xl font-bold"
+                          >
+                            -
+                          </button>
+
+                          <div className="bg-gray-100 px-5 py-2 rounded-lg font-bold">
+                            {item.quantity}
+                          </div>
+
+                          <button
+                            onClick={() =>
+                              increaseQuantity(item.id)
+                            }
+                            className="w-10 h-10 bg-black text-white rounded-lg text-xl font-bold"
+                          >
+                            +
+                          </button>
+
                       </div>
 
                     </div>

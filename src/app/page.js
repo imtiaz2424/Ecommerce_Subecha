@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { CartContext } from "../context/CartContext";
 import products from "../data/products";
 import { AuthContext } from "../context/AuthContext";
@@ -10,6 +10,12 @@ export default function Home() {
 
   const { cart } = useContext(CartContext);
   const { user } = useContext(AuthContext);
+  const [search, setSearch] = useState("");
+  const filteredProducts = products.filter((product) =>
+  product.name
+    .toLowerCase()
+    .includes(search.toLowerCase())
+    );
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -61,6 +67,13 @@ export default function Home() {
             </Link>
 
             <Link
+              href="/"
+              className="hover:text-violet-600 transition"
+            >
+              Wishlist
+            </Link>
+
+            <Link
               href="/cart"
               className="hover:text-violet-600 transition"
             >
@@ -92,6 +105,7 @@ export default function Home() {
         </div>
 
       </nav>
+      
 
       {/* Hero Section */}
 
@@ -205,6 +219,26 @@ export default function Home() {
 
       </section>
 
+      {/* Search */}
+
+      <section className="max-w-7xl mx-auto px-6 py-8">
+
+        <div className="bg-white p-4 rounded-3xl shadow-md">
+
+          <input
+            type="text"
+            placeholder="Search products..."
+            value={search}
+            onChange={(e) =>
+              setSearch(e.target.value)
+            }
+            className="w-full px-6 py-4 border rounded-2xl outline-none focus:border-violet-600"
+          />
+
+        </div>
+
+      </section>
+
       {/* Products */}
 
         <section className="max-w-7xl mx-auto px-8 pb-24">
@@ -225,68 +259,61 @@ export default function Home() {
 
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+          <div className="grid md:grid-cols-3 gap-10">
 
-            {products.map((product) => (
+            {filteredProducts.length > 0 ? (
 
-              <Link
-                href={`/products/${product.id}`}
-                key={product.id}
-              >
+              filteredProducts.map((product) => (
 
-                <div className="bg-white rounded-[35px] overflow-hidden shadow-lg hover:-translate-y-3 transition duration-300 cursor-pointer">
-
-                  <div className="overflow-hidden">
+                <Link
+                  href={`/products/${product.id}`}
+                  key={product.id}
+                >
+                  <div className="bg-white rounded-[35px] overflow-hidden shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
 
                     <img
                       src={product.image}
                       alt={product.name}
-                      className="w-full h-96 object-cover hover:scale-110 transition duration-700"
+                      className="w-full h-80 object-cover"
                     />
 
-                  </div>
+                    <div className="p-6">
 
-                  <div className="p-8">
+                      <h3 className="text-2xl font-black">
+                        {product.name}
+                      </h3>
 
-                    <div className="flex justify-between items-start mb-5">
-
-                      <div>
-
-                        <h3 className="text-3xl font-black mb-2">
-                          {product.name}
-                        </h3>
-
-                        <p className="text-gray-500">
-                          Premium Modern Product
-                        </p>
-
-                      </div>
-
-                      <span className="bg-black text-white px-4 py-2 rounded-full text-sm">
-                        New
-                      </span>
-
-                    </div>
-
-                    <div className="flex justify-between items-center">
-
-                      <span className="text-4xl font-black">
+                      <p className="text-4xl font-black mt-3">
                         ${product.price}
-                      </span>
+                      </p>
 
-                      <button className="bg-black text-white px-6 py-3 rounded-2xl hover:bg-gray-800 transition">
-                        View Product
+                      <button className="mt-5 w-full bg-black text-white py-3 rounded-xl font-semibold">
+                        View Details
                       </button>
 
                     </div>
 
                   </div>
 
-                </div>
+                </Link>
 
-              </Link>
+              ))
 
-            ))}
+            ) : (
+
+              <div className="col-span-3 text-center py-20">
+
+                <h2 className="text-4xl font-black mb-4">
+                  No Products Found
+                </h2>
+
+                <p className="text-gray-500">
+                  Try another search keyword.
+                </p>
+
+              </div>
+
+            )}
 
           </div>
 
