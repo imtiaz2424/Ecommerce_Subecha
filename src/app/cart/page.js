@@ -226,11 +226,10 @@ export default function CartPage() {
                   Clear Cart
                 </button>
 
-                <Link
-                  href="/checkout"
-                  className="block w-full bg-black text-white text-center py-5 rounded-2xl text-xl font-bold hover:bg-gray-800 transition"
-                >
-                  Proceed To Checkout
+                <Link href="/checkout">
+                  <button className="w-full bg-green-600 text-white px-6 py-3 rounded-xl mt-4">
+                    Checkout
+                  </button>
                 </Link>
 
               </div>

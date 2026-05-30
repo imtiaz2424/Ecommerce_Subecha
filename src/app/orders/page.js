@@ -1,87 +1,103 @@
 "use client";
 
-import {
-  useContext,
-} from "react";
-
+import { useEffect, useState } from "react";
 import Link from "next/link";
 
-import {
-  OrderContext,
-} from "../../context/OrderContext";
-
 export default function OrdersPage() {
+  const [orders, setOrders] = useState([]);
 
-  const { orders } =
-    useContext(OrderContext);
+  useEffect(() => {
+    const saved = localStorage.getItem("orders");
+
+    if (saved) {
+      setOrders(JSON.parse(saved));
+    }
+  }, []);
 
   return (
-    <main className="min-h-screen bg-gray-100 p-8">
+    <main className="min-h-screen bg-gray-100 p-10">
 
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-5xl mx-auto">
+         {/* Back */}
+      
+        <Link
+          href="/"
+          className="inline-block mb-10 mt-10 bg-black text-white px-6 py-3 rounded-2xl hover:bg-gray-800 transition"
+        >
+          ← Back To Home
+        </Link>
 
-        <h1 className="text-5xl font-black mb-10">
-          My Orders
+        <h1 className="text-4xl font-black mb-8">
+          📦 My Orders
         </h1>
 
         {orders.length === 0 ? (
-
-          <div className="bg-white p-10 rounded-3xl">
-
-            <h2 className="text-3xl font-bold mb-4">
+          <div className="bg-white p-8 rounded-3xl text-center">
+            <h2 className="text-2xl font-bold">
               No Orders Yet
             </h2>
 
             <Link
               href="/"
-              className="bg-black text-white px-6 py-3 rounded-xl"
+              className="text-violet-600 mt-4 block"
             >
-              Shop Now
+              Start Shopping
             </Link>
-
           </div>
-
         ) : (
-
           <div className="space-y-6">
 
             {orders.map((order) => (
-
               <div
                 key={order.id}
-                className="bg-white p-8 rounded-3xl shadow-lg"
+                className="bg-white p-6 rounded-3xl shadow-lg"
               >
 
-                <h2 className="text-2xl font-bold mb-2">
-                  Order #{order.id}
-                </h2>
+                {/* Order Info */}
+                <div className="flex justify-between mb-4">
 
-                <p>
-                  Date: {order.date}
-                </p>
+                  <p className="font-bold">
+                    Order ID: {order.id}
+                  </p>
 
-                <p>
-                  Status:
-                  {" "}
-                  {order.status}
-                </p>
+                  <p className="text-gray-500">
+                    {order.date}
+                  </p>
 
-                <p className="font-bold text-xl mt-2">
-                  Total:
-                  {" "}
-                  ${order.total}
+                </div>
+
+                {/* Items */}
+                <div className="border-t pt-4">
+                  {order.items.map((item, i) => (
+                    <div
+                      key={i}
+                      className="flex justify-between py-1"
+                    >
+                      <span>{item.name}</span>
+                      <span>${item.price}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Total */}
+                <div className="mt-4 text-xl font-black">
+                  Total: ${order.total}
+                </div>
+
+                {/* Address */}
+                <p className="text-gray-600 mt-2">
+                  📍 {order.address}
                 </p>
 
               </div>
-
             ))}
 
           </div>
-
         )}
 
-      </div>
+       
 
+      </div>
     </main>
   );
 }

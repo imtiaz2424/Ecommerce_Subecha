@@ -1,349 +1,236 @@
 "use client";
 
 import Link from "next/link";
-import {
-  useContext,
-  useState,
-  useEffect,
-} from "react";
+import { useContext, useState, useEffect } from "react";
 import { CartContext } from "../context/CartContext";
-import products from "../data/products";
 import { AuthContext } from "../context/AuthContext";
-
+import defaultProducts from "../data/products";
 
 export default function Home() {
-
   const { cart } = useContext(CartContext);
   const { user } = useContext(AuthContext);
+
+  const [products, setProducts] = useState([]);
   const [search, setSearch] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
   const [mounted, setMounted] = useState(false);
-    useEffect(() => {
-      setMounted(true);
-    }, []);
-  const filteredProducts = products.filter((product) =>
-  product.name
-    .toLowerCase()
-    .includes(search.toLowerCase())
-    );
-  
+  const [ratings, setRatings] = useState({});
+
+  // LOAD DATA
+  useEffect(() => {
+    setMounted(true);
+
+    const savedProducts = localStorage.getItem("products");
+    const savedRatings = localStorage.getItem("ratings");
+
+    if (savedProducts) {
+      setProducts(JSON.parse(savedProducts));
+    } else {
+      setProducts(defaultProducts);
+    }
+
+    if (savedRatings) {
+      setRatings(JSON.parse(savedRatings));
+    }
+  }, []);
+
+  // categories
+  const categories = [
+    "All",
+    ...new Set(products.map((p) => p.category)),
+  ];
+
+  // filter products
+  const filteredProducts = products.filter((product) => {
+    const matchesSearch = product.name
+      .toLowerCase()
+      .includes(search.toLowerCase());
+
+    const matchesCategory =
+      selectedCategory === "All" ||
+      product.category === selectedCategory;
+
+    return matchesSearch && matchesCategory;
+  });
+
+  // top rated
+  const topRatedProducts = [...products]
+    .map((p) => ({
+      ...p,
+      rating: ratings?.[p.id] || 0,
+    }))
+    .filter((p) => p.rating > 0)
+    .sort((a, b) => b.rating - a.rating);
 
   return (
     <main className="min-h-screen bg-gray-50">
 
-      {/* Navbar */}
-
+      {/* NAVBAR */}
       <nav className="sticky top-0 z-50 backdrop-blur-xl bg-white/80 border-b border-gray-200">
-
         <div className="max-w-7xl mx-auto px-8 py-5 flex justify-between items-center">
 
-          {/* Logo */}
-
-          <Link
-            href="/"
-            className="flex items-center gap-4"
-          >
-
+          <Link href="/" className="flex items-center gap-4">
             <div className="w-14 h-14 rounded-2xl bg-gradient-to-r from-violet-600 to-indigo-600 flex items-center justify-center shadow-lg">
-
-              <span className="text-white text-3xl font-black">
-                S
-              </span>
-
+              <span className="text-white text-3xl font-black">S</span>
             </div>
 
             <div>
-
-              <h1 className="text-3xl font-black tracking-tight text-gray-900">
-                Subecha
-              </h1>
-
-              <p className="text-sm text-gray-500">
-                Premium Shopping
-              </p>
-
+              <h1 className="text-3xl font-black">Subecha</h1>
+              <p className="text-sm text-gray-500">Premium Shopping</p>
             </div>
-
           </Link>
-
-          {/* Menu */}
 
           <div className="hidden md:flex items-center gap-10 text-lg font-semibold">
 
-            <Link
-              href="/"
-              className="hover:text-violet-600 transition"
-            >
-              Home
-            </Link>
+            <Link href="/">Home</Link>
+            <Link href="/wishlist">Wishlist</Link>
 
-            <Link
-              href="/wishlist"
-              className="hover:text-violet-600 transition"
-            >
-              Wishlist
-            </Link>
-
-            <Link
-              href="/cart"
-              className="hover:text-violet-600 transition"
-            >
+            <Link href="/cart">
               Cart ({mounted ? cart.length : 0})
             </Link>
 
+            <Link href="/orders">Orders</Link>
+
             {user ? (
-
-              <Link
-                href="/profile"
-                className="hover:text-violet-600 transition"
-              >
-                Profile
-              </Link>
-
+              <Link href="/profile">Profile</Link>
             ) : (
-
               <Link
                 href="/login"
-                className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white px-6 py-3 rounded-2xl hover:scale-105 transition shadow-lg"
+                className="bg-violet-600 text-white px-6 py-3 rounded-2xl"
               >
                 Login
               </Link>
-
             )}
 
           </div>
 
         </div>
-
       </nav>
-      
 
-      {/* Hero Section */}
+      {/* SEARCH */}
+      <section className="max-w-7xl mx-auto px-6 py-8">
+        <input
+          type="text"
+          placeholder="Search products..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full px-6 py-4 border rounded-2xl"
+        />
+      </section>
 
-        <section className="relative overflow-hidden bg-gradient-to-r from-violet-700 via-indigo-700 to-blue-700 text-white">
+      {/* CATEGORY */}
+      <section className="max-w-7xl mx-auto px-6 pb-8">
+        <div className="flex flex-wrap gap-3">
+          {categories.map((category) => (
+            <button
+              key={category}
+              onClick={() => setSelectedCategory(category)}
+              className={`px-5 py-2 rounded-2xl font-semibold ${
+                selectedCategory === category
+                  ? "bg-violet-600 text-white"
+                  : "bg-white shadow"
+              }`}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+      </section>
 
-          {/* Blur Effects */}
+      {/* TOP RATED */}
+      {topRatedProducts.length > 0 && (
+        <section className="max-w-7xl mx-auto px-8 pb-10">
+          <h2 className="text-3xl font-black mb-6">
+            ⭐ Top Rated Products
+          </h2>
 
-          <div className="absolute top-0 left-0 w-96 h-96 bg-pink-500 opacity-20 blur-[120px]" />
+          <div className="grid md:grid-cols-3 gap-8">
+            {topRatedProducts.map((product) => (
+              <Link
+                key={product.id}
+                href={`/products/${product.id}`}
+              >
+                <div className="bg-white rounded-3xl shadow-lg overflow-hidden hover:-translate-y-2 transition">
 
-          <div className="absolute bottom-0 right-0 w-96 h-96 bg-cyan-400 opacity-20 blur-[120px]" />
+                  <img
+                    src={product.image}
+                    className="w-full h-64 object-cover"
+                  />
 
-          <div className="max-w-7xl mx-auto px-8 py-32 grid md:grid-cols-2 gap-16 items-center relative z-10">
+                  <div className="p-5">
+                    <h3 className="text-xl font-bold">
+                      {product.name}
+                    </h3>
 
-            <div>
+                    <p className="text-yellow-500 font-bold mt-2">
+                      ⭐ {product.rating}/5
+                    </p>
 
-              <p className="uppercase tracking-[8px] text-violet-200 mb-6">
-                Best Online Shop
-              </p>
+                    <p className="text-2xl font-black mt-2">
+                      ${product.price}
+                    </p>
+                  </div>
 
-              <h1 className="text-6xl md:text-7xl font-black leading-tight mb-8">
-
-                Shop Smart
-                <br />
-
-                With Subecha
-
-              </h1>
-
-              <p className="text-xl text-violet-100 mb-10 leading-relaxed">
-
-                Premium products, modern design,
-                secure shopping and lightning fast
-                delivery all over Bangladesh.
-
-              </p>
-
-              <div className="flex gap-5">
-
-                <button className="bg-white text-black px-8 py-4 rounded-2xl text-lg font-bold hover:scale-105 transition shadow-xl">
-                  Shop Now
-                </button>
-
-                <button className="border border-white px-8 py-4 rounded-2xl text-lg hover:bg-white hover:text-black transition">
-                  Explore
-                </button>
-
-              </div>
-
-            </div>
-
-            {/* Hero Image */}
-
-            <div className="relative">
-
-              <div className="absolute inset-0 bg-white/20 blur-3xl rounded-full" />
-
-              <img
-                src="https://images.unsplash.com/photo-1523381210434-271e8be1f52b"
-                alt="Fashion"
-                className="relative rounded-[40px] shadow-2xl h-[650px] w-full object-cover border border-white/20"
-              />
-
-            </div>
-
+                </div>
+              </Link>
+            ))}
           </div>
-
         </section>
+      )}
 
-      {/* Features */}
-      <section className="max-w-7xl mx-auto px-8 py-20">
-
+      {/* PRODUCTS */}
+      <section className="max-w-7xl mx-auto px-8 pb-24">
         <div className="grid md:grid-cols-3 gap-10">
 
-          <div className="bg-white p-10 rounded-3xl shadow-md text-center">
+          {filteredProducts.length > 0 ? (
+            filteredProducts.map((product) => (
+              <Link
+                key={product.id}
+                href={`/products/${product.id}`}
+              >
+                <div className="bg-white rounded-3xl overflow-hidden shadow-lg hover:-translate-y-2 transition">
 
-            <h3 className="text-2xl font-bold mb-4">
-              Fast Delivery
-            </h3>
+                  <img
+                    src={product.image}
+                    className="w-full h-80 object-cover"
+                  />
 
-            <p className="text-gray-600">
-              Super fast delivery all over Bangladesh.
-            </p>
+                  <div className="p-6">
 
-          </div>
+                    <h3 className="text-2xl font-bold">
+                      {product.name}
+                    </h3>
 
-          <div className="bg-white p-10 rounded-3xl shadow-md text-center">
+                    <p className="text-3xl font-black mt-3">
+                      ${product.price}
+                    </p>
 
-            <h3 className="text-2xl font-bold mb-4">
-              Premium Quality
-            </h3>
-
-            <p className="text-gray-600">
-              Best premium quality products for everyone.
-            </p>
-
-          </div>
-
-          <div className="bg-white p-10 rounded-3xl shadow-md text-center">
-
-            <h3 className="text-2xl font-bold mb-4">
-              Secure Payment
-            </h3>
-
-            <p className="text-gray-600">
-              Safe and secure payment system.
-            </p>
-
-          </div>
-
-        </div>
-
-      </section>
-
-      {/* Search */}
-
-      <section className="max-w-7xl mx-auto px-6 py-8">
-
-        <div className="bg-white p-4 rounded-3xl shadow-md">
-
-          <input
-            type="text"
-            placeholder="Search products..."
-            value={search}
-            onChange={(e) =>
-              setSearch(e.target.value)
-            }
-            className="w-full px-6 py-4 border rounded-2xl outline-none focus:border-violet-600"
-          />
-
-        </div>
-
-      </section>
-
-      {/* Products */}
-
-        <section className="max-w-7xl mx-auto px-8 pb-24">
-
-          <div className="flex justify-between items-center mb-14">
-
-            <div>
-
-              <p className="text-gray-500 uppercase tracking-[5px] mb-3">
-                Products
-              </p>
-
-              <h2 className="text-5xl font-black">
-                Featured Products
-              </h2>
-
-            </div>
-
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-10">
-
-            {filteredProducts.length > 0 ? (
-
-              filteredProducts.map((product) => (
-
-                <Link
-                  href={`/products/${product.id}`}
-                  key={product.id}
-                >
-                  <div className="bg-white rounded-[35px] overflow-hidden shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
-
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-full h-80 object-cover"
-                    />
-
-                    <div className="p-6">
-
-                      <h3 className="text-2xl font-black">
-                        {product.name}
-                      </h3>
-
-                      <p className="text-4xl font-black mt-3">
-                        ${product.price}
-                      </p>
-
-                      <button className="mt-5 w-full bg-black text-white py-3 rounded-xl font-semibold">
-                        View Details
-                      </button>
-
-                    </div>
+                    <p className="text-sm text-gray-500 mt-2">
+                      {product.category}
+                    </p>
 
                   </div>
 
-                </Link>
-
-              ))
-
-            ) : (
-
-              <div className="col-span-3 text-center py-20">
-
-                <h2 className="text-4xl font-black mb-4">
-                  No Products Found
-                </h2>
-
-                <p className="text-gray-500">
-                  Try another search keyword.
-                </p>
-
-              </div>
-
-            )}
-
-          </div>
-
-        </section>
-
-      {/* Footer */}
-      <footer className="bg-black text-white py-12">
-
-        <div className="max-w-7xl mx-auto px-8 text-center">
-
-          <h2 className="text-3xl font-black mb-4">
-            Subecha
-          </h2>
-
-          <p className="text-gray-400">
-            © 2026 All Rights Reserved
-          </p>
+                </div>
+              </Link>
+            ))
+          ) : (
+            <div className="col-span-3 text-center py-20">
+              <h2 className="text-3xl font-black">
+                No Products Found
+              </h2>
+            </div>
+          )}
 
         </div>
+      </section>
 
+      {/* FOOTER */}
+      <footer className="bg-black text-white py-12 text-center">
+        <h2 className="text-2xl font-black">Subecha</h2>
+        <p className="text-gray-400">
+          © 2026 All Rights Reserved
+        </p>
       </footer>
 
     </main>

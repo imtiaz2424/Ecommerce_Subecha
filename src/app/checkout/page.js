@@ -1,176 +1,122 @@
 "use client";
 
-import { useContext } from "react";
+import { useContext, useState, useEffect } from "react";
 import Link from "next/link";
 import { CartContext } from "../../context/CartContext";
-import { OrderContext } from "../../context/OrderContext";
 
 export default function CheckoutPage() {
+  const { cart, setCart } = useContext(CartContext);
 
-  const { cart } = useContext(CartContext);
+  const [address, setAddress] = useState("");
+  const [orders, setOrders] = useState([]);
 
-  const totalPrice = cart.reduce(
-  (total, item) =>
-    total + item.price * item.quantity,
-  0
-);
-  const { clearCart } = useContext(CartContext);
-  const { addOrder } = useContext(OrderContext);
+  // load previous orders
+  useEffect(() => {
+    const saved = localStorage.getItem("orders");
+    if (saved) {
+      setOrders(JSON.parse(saved));
+    }
+  }, []);
+
+  // total price
+  const total = cart.reduce(
+    (sum, item) => sum + item.price,
+    0
+  );
+
+  // place order
+  const handleOrder = () => {
+    if (!address) {
+      alert("Please enter address");
+      return;
+    }
+
+    const newOrder = {
+      id: Date.now(),
+      items: cart,
+      total,
+      address,
+      date: new Date().toLocaleDateString(),
+    };
+
+    const updated = [...orders, newOrder];
+
+    setOrders(updated);
+
+    localStorage.setItem(
+      "orders",
+      JSON.stringify(updated)
+    );
+
+    setCart([]);
+
+    localStorage.removeItem("cart");
+
+    alert("Order Placed Successfully!");
+  };
 
   return (
-    <main className="min-h-screen bg-gray-100 py-16 px-6">
+    <main className="min-h-screen bg-gray-100 p-10">
 
-      <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-10">
+      <div className="max-w-4xl mx-auto bg-white p-8 rounded-3xl shadow-lg">
 
-        {/* Left Side */}
+        <h1 className="text-4xl font-black mb-6">
+          Checkout
+        </h1>
 
-        <div className="bg-white p-10 rounded-3xl shadow-lg">
-
-          <h1 className="text-5xl font-black mb-10">
-            Checkout
-          </h1>
-
-          <form className="space-y-6">
-
-            <div>
-
-              <label className="block mb-2 text-lg font-semibold">
-                Full Name
-              </label>
-
-              <input
-                type="text"
-                placeholder="Enter your name"
-                className="w-full border border-gray-300 rounded-2xl px-5 py-4 outline-none focus:border-black"
-              />
-
-            </div>
-
-            <div>
-
-              <label className="block mb-2 text-lg font-semibold">
-                Phone Number
-              </label>
-
-              <input
-                type="text"
-                placeholder="01XXXXXXXXX"
-                className="w-full border border-gray-300 rounded-2xl px-5 py-4 outline-none focus:border-black"
-              />
-
-            </div>
-
-            <div>
-
-              <label className="block mb-2 text-lg font-semibold">
-                Delivery Address
-              </label>
-
-              <textarea
-                placeholder="Enter your address"
-                rows="5"
-                className="w-full border border-gray-300 rounded-2xl px-5 py-4 outline-none focus:border-black"
-              />
-
-            </div>
-
-            <button
-              type="button"
-              onClick={() => {
-
-                const newOrder = {
-                  id: Date.now(),
-                  date:
-                    new Date().toLocaleDateString(),
-                  items: cart,
-                  total: totalPrice,
-                  status: "Pending",
-                };
-
-                addOrder(newOrder);
-
-                clearCart();
-
-                alert(
-                  "Order Placed Successfully!"
-                );
-
-              }}
-              className="w-full bg-black text-white py-4 rounded-2xl text-xl font-bold"
-            >
-              Place Order
-            </button>
-
-          </form>
-
-        </div>
-
-        {/* Right Side */}
-
-        <div className="bg-white p-10 rounded-3xl shadow-lg h-fit">
-
-          <h2 className="text-4xl font-black mb-8">
-            Order Summary
+        {/* CART ITEMS */}
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold mb-4">
+            Cart Items
           </h2>
 
-          <div className="space-y-5">
-
-            {cart.map((item, index) => (
-
-              <div
-                key={index}
-                className="flex items-center gap-5 border-b pb-5"
-              >
-
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  className="w-24 h-24 object-cover rounded-2xl"
-                />
-
-                <div className="flex-1">
-
-                  <h3 className="text-xl font-bold">
-                    {item.name}
-                  </h3>
-
-                  <p className="text-gray-500">
-                    ${item.price}
-                  </p>
-
-                </div>
-
-              </div>
-
-            ))}
-
-          </div>
-
-          {/* Total */}
-
-          <div className="mt-10 flex justify-between items-center">
-
-            <h3 className="text-3xl font-black">
-              Total
-            </h3>
-
-            <p className="text-4xl font-black">
-              ${totalPrice}
+          {cart.length === 0 ? (
+            <p className="text-gray-500">
+              No items in cart
             </p>
-
-          </div>
-
-          <Link
-            href="/cart"
-            className="block mt-10 text-center bg-gray-200 py-4 rounded-2xl text-lg font-semibold hover:bg-gray-300 transition"
-          >
-            Back To Cart
-          </Link>
-
+          ) : (
+            cart.map((item, i) => (
+              <div
+                key={i}
+                className="flex justify-between border-b py-2"
+              >
+                <span>{item.name}</span>
+                <span>${item.price}</span>
+              </div>
+            ))
+          )}
         </div>
 
-      </div>
+        {/* TOTAL */}
+        <h2 className="text-2xl font-black mb-6">
+          Total: ${total}
+        </h2>
 
+        {/* ADDRESS */}
+        <textarea
+          placeholder="Enter your address..."
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+          className="w-full border p-4 rounded-xl mb-6"
+        />
+
+        {/* BUTTON */}
+        <button
+          onClick={handleOrder}
+          className="bg-black text-white w-full py-4 rounded-2xl text-xl font-bold"
+        >
+          Place Order
+        </button>
+
+        {/* BACK */}
+        <Link
+          href="/cart"
+          className="block text-center mt-4 text-violet-600"
+        >
+          ← Back to Cart
+        </Link>
+
+      </div>
     </main>
   );
 }
