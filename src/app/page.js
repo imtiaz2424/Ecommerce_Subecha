@@ -16,31 +16,37 @@ export default function Home() {
   const [mounted, setMounted] = useState(false);
   const [ratings, setRatings] = useState({});
 
-  // LOAD DATA
   useEffect(() => {
     setMounted(true);
 
-    const savedProducts = localStorage.getItem("products");
+    // Load Ratings
     const savedRatings = localStorage.getItem("ratings");
-
-    if (savedProducts) {
-      setProducts(JSON.parse(savedProducts));
-    } else {
-      setProducts(defaultProducts);
-    }
 
     if (savedRatings) {
       setRatings(JSON.parse(savedRatings));
     }
+
+    // Load Products from Django API
+    fetch("http://127.0.0.1:8000/api/products/")
+      .then((res) => res.json())
+      .then((data) => {
+        setProducts(data);
+      })
+      .catch((error) => {
+        console.log("Backend Error:", error);
+
+        // Fallback Local Products
+        setProducts(defaultProducts);
+      });
   }, []);
 
-  // categories
+  // Categories
   const categories = [
     "All",
     ...new Set(products.map((p) => p.category)),
   ];
 
-  // filter products
+  // Search + Category Filter
   const filteredProducts = products.filter((product) => {
     const matchesSearch = product.name
       .toLowerCase()
@@ -53,7 +59,7 @@ export default function Home() {
     return matchesSearch && matchesCategory;
   });
 
-  // top rated
+  // Top Rated Products
   const topRatedProducts = [...products]
     .map((p) => ({
       ...p,
@@ -65,34 +71,47 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-gray-50">
 
-      {/* NAVBAR */}
+      {/* Navbar */}
       <nav className="sticky top-0 z-50 backdrop-blur-xl bg-white/80 border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-8 py-5 flex justify-between items-center">
 
           <Link href="/" className="flex items-center gap-4">
             <div className="w-14 h-14 rounded-2xl bg-gradient-to-r from-violet-600 to-indigo-600 flex items-center justify-center shadow-lg">
-              <span className="text-white text-3xl font-black">S</span>
+              <span className="text-white text-3xl font-black">
+                S
+              </span>
             </div>
 
             <div>
-              <h1 className="text-3xl font-black">Subecha</h1>
-              <p className="text-sm text-gray-500">Premium Shopping</p>
+              <h1 className="text-3xl font-black">
+                Subecha
+              </h1>
+              <p className="text-sm text-gray-500">
+                Premium Shopping
+              </p>
             </div>
           </Link>
 
           <div className="hidden md:flex items-center gap-10 text-lg font-semibold">
 
             <Link href="/">Home</Link>
-            <Link href="/wishlist">Wishlist</Link>
+
+            <Link href="/wishlist">
+              Wishlist
+            </Link>
 
             <Link href="/cart">
               Cart ({mounted ? cart.length : 0})
             </Link>
 
-            <Link href="/orders">Orders</Link>
+            <Link href="/orders">
+              Orders
+            </Link>
 
             {user ? (
-              <Link href="/profile">Profile</Link>
+              <Link href="/profile">
+                Profile
+              </Link>
             ) : (
               <Link
                 href="/login"
@@ -107,24 +126,29 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* SEARCH */}
+      {/* Search */}
       <section className="max-w-7xl mx-auto px-6 py-8">
         <input
           type="text"
           placeholder="Search products..."
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) =>
+            setSearch(e.target.value)
+          }
           className="w-full px-6 py-4 border rounded-2xl"
         />
       </section>
 
-      {/* CATEGORY */}
+      {/* Categories */}
       <section className="max-w-7xl mx-auto px-6 pb-8">
         <div className="flex flex-wrap gap-3">
+
           {categories.map((category) => (
             <button
               key={category}
-              onClick={() => setSelectedCategory(category)}
+              onClick={() =>
+                setSelectedCategory(category)
+              }
               className={`px-5 py-2 rounded-2xl font-semibold ${
                 selectedCategory === category
                   ? "bg-violet-600 text-white"
@@ -134,17 +158,20 @@ export default function Home() {
               {category}
             </button>
           ))}
+
         </div>
       </section>
 
-      {/* TOP RATED */}
+      {/* Top Rated Products */}
       {topRatedProducts.length > 0 && (
         <section className="max-w-7xl mx-auto px-8 pb-10">
+
           <h2 className="text-3xl font-black mb-6">
             ⭐ Top Rated Products
           </h2>
 
           <div className="grid md:grid-cols-3 gap-8">
+
             {topRatedProducts.map((product) => (
               <Link
                 key={product.id}
@@ -154,10 +181,12 @@ export default function Home() {
 
                   <img
                     src={product.image}
+                    alt={product.name}
                     className="w-full h-64 object-cover"
                   />
 
                   <div className="p-5">
+
                     <h3 className="text-xl font-bold">
                       {product.name}
                     </h3>
@@ -169,17 +198,21 @@ export default function Home() {
                     <p className="text-2xl font-black mt-2">
                       ${product.price}
                     </p>
+
                   </div>
 
                 </div>
               </Link>
             ))}
+
           </div>
+
         </section>
       )}
 
-      {/* PRODUCTS */}
+      {/* Products */}
       <section className="max-w-7xl mx-auto px-8 pb-24">
+
         <div className="grid md:grid-cols-3 gap-10">
 
           {filteredProducts.length > 0 ? (
@@ -192,6 +225,7 @@ export default function Home() {
 
                   <img
                     src={product.image}
+                    alt={product.name}
                     className="w-full h-80 object-cover"
                   />
 
@@ -216,21 +250,29 @@ export default function Home() {
             ))
           ) : (
             <div className="col-span-3 text-center py-20">
+
               <h2 className="text-3xl font-black">
                 No Products Found
               </h2>
+
             </div>
           )}
 
         </div>
+
       </section>
 
-      {/* FOOTER */}
+      {/* Footer */}
       <footer className="bg-black text-white py-12 text-center">
-        <h2 className="text-2xl font-black">Subecha</h2>
+
+        <h2 className="text-2xl font-black">
+          Subecha
+        </h2>
+
         <p className="text-gray-400">
           © 2026 All Rights Reserved
         </p>
+
       </footer>
 
     </main>
