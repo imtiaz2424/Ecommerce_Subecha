@@ -1,129 +1,143 @@
 "use client";
 
-import Link from "next/link";
+import { useState, useContext } from "react";
 import { useRouter } from "next/navigation";
-import {
-  useContext,
-  useState,
-} from "react";
-
-import {
-  AuthContext,
-} from "../../context/AuthContext";
+import Link from "next/link";
+import { AuthContext } from "../../context/AuthContext";
 
 export default function LoginPage() {
+const router = useRouter();
 
-  const router = useRouter();
+const { login } = useContext(AuthContext);
 
-  const { login } =
-    useContext(AuthContext);
+const [form, setForm] = useState({
+username: "",
+password: "",
+});
 
-  const [email, setEmail] =
-    useState("");
+const [loading, setLoading] = useState(false);
 
-  const [password, setPassword] =
-    useState("");
+const handleChange = (e) => {
+setForm({
+form,
+[e.target.name]: e.target.value,
+});
+};
 
-  const handleLogin = (e) => {
+const handleSubmit = async (e) => {
+e.preventDefault();
 
-    e.preventDefault();
 
-    const userData = {
-      name: "Imtiaz Sharif",
-      email,
-    };
+try {
+  setLoading(true);
 
-    login(userData);
-
-    alert("Login Successful");
-
-    router.push("/");
-  };
-
-  return (
-    <main className="min-h-screen bg-gray-100 flex items-center justify-center px-6">
-
-      <div className="bg-white w-full max-w-md p-10 rounded-[35px] shadow-xl">
-
-        <div className="text-center mb-10">
-
-          <h1 className="text-5xl font-black mb-4">
-            Welcome Back
-          </h1>
-
-          <p className="text-gray-500">
-            Login to your account
-          </p>
-
-        </div>
-
-        <form
-          onSubmit={handleLogin}
-          className="space-y-6"
-        >
-
-          <div>
-
-            <label className="block mb-2 font-semibold">
-              Email Address
-            </label>
-
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) =>
-                setEmail(e.target.value)
-              }
-              placeholder="Enter your email"
-              className="w-full border border-gray-300 rounded-2xl px-5 py-4 outline-none focus:border-black"
-            />
-
-          </div>
-
-          <div>
-
-            <label className="block mb-2 font-semibold">
-              Password
-            </label>
-
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) =>
-                setPassword(e.target.value)
-              }
-              placeholder="Enter your password"
-              className="w-full border border-gray-300 rounded-2xl px-5 py-4 outline-none focus:border-black"
-            />
-
-          </div>
-
-          <button
-            type="submit"
-            className="w-full bg-black text-white py-5 rounded-2xl text-xl font-bold hover:bg-gray-800 transition"
-          >
-            Login
-          </button>
-
-        </form>
-
-        <p className="text-center text-gray-500 mt-8">
-
-          Don&apos;t have an account?
-
-          <Link
-            href="/register"
-            className="text-black font-bold ml-2"
-          >
-            Register
-          </Link>
-
-        </p>
-
-      </div>
-
-    </main>
+  const response = await fetch(
+    "http://127.0.0.1:8000/api/token/",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(form),
+    }
   );
+
+  const data = await response.json();
+
+  console.log(data);
+
+  if (!response.ok) {
+    alert("Invalid Username or Password");
+    return;
+  }
+
+  localStorage.setItem(
+    "access_token",
+    data.access
+  );
+
+  localStorage.setItem(
+    "refresh_token",
+    data.refresh
+  );
+
+  login();
+
+  alert("Login Successful");
+
+  router.push("/");
+
+} catch (error) {
+  console.error(error);
+  alert("Login Failed");
+} finally {
+  setLoading(false);
+}
+
+
+};
+
+return ( <main className="min-h-screen bg-gray-100 flex items-center justify-center p-5">
+
+
+  <div className="bg-white p-10 rounded-3xl shadow-lg w-full max-w-md">
+
+    <h1 className="text-4xl font-black mb-8 text-center">
+      Login
+    </h1>
+
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-5"
+    >
+
+      <input
+        type="text"
+        name="username"
+        placeholder="Username"
+        value={form.username}
+        onChange={handleChange}
+        className="w-full border p-4 rounded-xl"
+        required
+      />
+
+      <input
+        type="password"
+        name="password"
+        placeholder="Password"
+        value={form.password}
+        onChange={handleChange}
+        className="w-full border p-4 rounded-xl"
+        required
+      />
+
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full bg-black text-white py-4 rounded-xl"
+      >
+        {loading
+          ? "Logging In..."
+          : "Login"}
+      </button>
+
+    </form>
+
+    <p className="text-center mt-6">
+      Don't have an account?
+
+      <Link
+        href="/register"
+        className="text-blue-600 ml-2"
+      >
+        Register
+      </Link>
+    </p>
+
+  </div>
+
+</main>
+
+
+);
 }

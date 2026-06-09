@@ -10,20 +10,9 @@ register_user,
 
 router = DefaultRouter()
 
-router.register(
-"products",
-ProductViewSet
-)
-
-router.register(
-"orders",
-OrderViewSet
-)
-
-router.register(
-"order-items",
-OrderItemViewSet
-)
+router.register("products", ProductViewSet)
+router.register("orders", OrderViewSet)
+router.register("order-items", OrderItemViewSet)
 
 urlpatterns = [
 path(

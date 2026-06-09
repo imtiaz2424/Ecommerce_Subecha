@@ -1,94 +1,136 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function RegisterPage() {
+const router = useRouter();
 
-  return (
-    <main className="min-h-screen bg-gray-100 flex items-center justify-center px-6">
+const [form, setForm] = useState({
+username: "",
+email: "",
+password: "",
+});
 
-      <div className="bg-white w-full max-w-md p-10 rounded-[35px] shadow-xl">
+const [loading, setLoading] = useState(false);
 
-        <div className="text-center mb-10">
+const handleChange = (e) => {
+setForm({
+form,
+[e.target.name]: e.target.value,
+});
+};
 
-          <h1 className="text-5xl font-black mb-4">
-            Create Account
-          </h1>
+const handleSubmit = async (e) => {
+e.preventDefault();
 
-          <p className="text-gray-500">
-            Register your new account
-          </p>
 
-        </div>
+try {
+  setLoading(true);
 
-        <form className="space-y-6">
-
-          <div>
-
-            <label className="block mb-2 font-semibold">
-              Full Name
-            </label>
-
-            <input
-              type="text"
-              placeholder="Enter your full name"
-              className="w-full border border-gray-300 rounded-2xl px-5 py-4 outline-none focus:border-black"
-            />
-
-          </div>
-
-          <div>
-
-            <label className="block mb-2 font-semibold">
-              Email Address
-            </label>
-
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="w-full border border-gray-300 rounded-2xl px-5 py-4 outline-none focus:border-black"
-            />
-
-          </div>
-
-          <div>
-
-            <label className="block mb-2 font-semibold">
-              Password
-            </label>
-
-            <input
-              type="password"
-              placeholder="Create password"
-              className="w-full border border-gray-300 rounded-2xl px-5 py-4 outline-none focus:border-black"
-            />
-
-          </div>
-
-          <button
-            type="submit"
-            className="w-full bg-black text-white py-5 rounded-2xl text-xl font-bold hover:bg-gray-800 transition"
-          >
-            Register
-          </button>
-
-        </form>
-
-        <p className="text-center text-gray-500 mt-8">
-
-          Already have an account?
-
-          <Link
-            href="/login"
-            className="text-black font-bold ml-2"
-          >
-            Login
-          </Link>
-
-        </p>
-
-      </div>
-
-    </main>
+  const response = await fetch(
+    "http://127.0.0.1:8000/api/register/",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(form),
+    }
   );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    alert(data.error || "Registration Failed");
+    return;
+  }
+
+  alert("Registration Successful");
+
+  router.push("/login");
+
+} catch (error) {
+  console.error(error);
+  alert("Something went wrong");
+} finally {
+  setLoading(false);
+}
+
+
+};
+
+return ( <main className="min-h-screen bg-gray-100 flex items-center justify-center p-5">
+
+
+  <div className="bg-white p-10 rounded-3xl shadow-lg w-full max-w-md">
+
+    <h1 className="text-4xl font-black mb-8 text-center">
+      Create Account
+    </h1>
+
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-5"
+    >
+
+      <input
+        type="text"
+        name="username"
+        placeholder="Username"
+        value={form.username}
+        onChange={handleChange}
+        className="w-full border p-4 rounded-xl"
+        required
+      />
+
+      <input
+        type="email"
+        name="email"
+        placeholder="Email"
+        value={form.email}
+        onChange={handleChange}
+        className="w-full border p-4 rounded-xl"
+        required
+      />
+
+      <input
+        type="password"
+        name="password"
+        placeholder="Password"
+        value={form.password}
+        onChange={handleChange}
+        className="w-full border p-4 rounded-xl"
+        required
+      />
+
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full bg-black text-white py-4 rounded-xl"
+      >
+        {loading
+          ? "Creating Account..."
+          : "Register"}
+      </button>
+
+    </form>
+
+    <p className="text-center mt-6">
+      Already have an account?
+      <Link
+        href="/login"
+        className="text-blue-600 ml-2"
+      >
+        Login
+      </Link>
+    </p>
+
+  </div>
+
+</main>
+
+
+);
 }
