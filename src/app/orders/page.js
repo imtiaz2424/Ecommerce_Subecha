@@ -4,100 +4,100 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 
 export default function OrdersPage() {
-  const [orders, setOrders] = useState([]);
+const [orders, setOrders] = useState([]);
+const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const saved = localStorage.getItem("orders");
+useEffect(() => {
+fetch("http://127.0.0.1:8000/api/orders/")
+.then((res) => res.json())
+.then((data) => {
+setOrders(data);
+setLoading(false);
+})
+.catch((err) => {
+console.error(err);
+setLoading(false);
+});
+}, []);
 
-    if (saved) {
-      setOrders(JSON.parse(saved));
-    }
-  }, []);
+return ( <main className="min-h-screen bg-gray-100 p-10">
 
-  return (
-    <main className="min-h-screen bg-gray-100 p-10">
+```
+  <div className="max-w-5xl mx-auto">
 
-      <div className="max-w-5xl mx-auto">
-         {/* Back */}
-      
+    <Link
+      href="/"
+      className="inline-block mb-10 mt-10 bg-black text-white px-6 py-3 rounded-2xl hover:bg-gray-800 transition"
+    >
+      ← Back To Home
+    </Link>
+
+    <h1 className="text-4xl font-black mb-8">
+      📦 My Orders
+    </h1>
+
+    {loading ? (
+      <div className="bg-white p-8 rounded-3xl text-center">
+        Loading Orders...
+      </div>
+    ) : orders.length === 0 ? (
+      <div className="bg-white p-8 rounded-3xl text-center">
+        <h2 className="text-2xl font-bold">
+          No Orders Yet
+        </h2>
+
         <Link
           href="/"
-          className="inline-block mb-10 mt-10 bg-black text-white px-6 py-3 rounded-2xl hover:bg-gray-800 transition"
+          className="text-violet-600 mt-4 block"
         >
-          ← Back To Home
+          Start Shopping
         </Link>
+      </div>
+    ) : (
+      <div className="space-y-6">
 
-        <h1 className="text-4xl font-black mb-8">
-          📦 My Orders
-        </h1>
+        {orders.map((order) => (
+          <div
+            key={order.id}
+            className="bg-white p-6 rounded-3xl shadow-lg"
+          >
 
-        {orders.length === 0 ? (
-          <div className="bg-white p-8 rounded-3xl text-center">
-            <h2 className="text-2xl font-bold">
-              No Orders Yet
-            </h2>
+            <div className="flex justify-between mb-4">
 
-            <Link
-              href="/"
-              className="text-violet-600 mt-4 block"
-            >
-              Start Shopping
-            </Link>
-          </div>
-        ) : (
-          <div className="space-y-6">
+              <p className="font-bold">
+                Order ID: #{order.id}
+              </p>
 
-            {orders.map((order) => (
-              <div
-                key={order.id}
-                className="bg-white p-6 rounded-3xl shadow-lg"
-              >
+              <p className="text-gray-500">
+                {new Date(
+                  order.created_at
+                ).toLocaleString()}
+              </p>
 
-                {/* Order Info */}
-                <div className="flex justify-between mb-4">
+            </div>
 
-                  <p className="font-bold">
-                    Order ID: {order.id}
-                  </p>
+            <div className="border-t pt-4">
 
-                  <p className="text-gray-500">
-                    {order.date}
-                  </p>
+              <p className="text-lg font-semibold">
+                User ID: {order.user}
+              </p>
 
-                </div>
+              <p className="text-2xl font-black mt-2">
+                Total: ${order.total_price}
+              </p>
 
-                {/* Items */}
-                <div className="border-t pt-4">
-                  {order.items.map((item, i) => (
-                    <div
-                      key={i}
-                      className="flex justify-between py-1"
-                    >
-                      <span>{item.name}</span>
-                      <span>${item.price}</span>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Total */}
-                <div className="mt-4 text-xl font-black">
-                  Total: ${order.total}
-                </div>
-
-                {/* Address */}
-                <p className="text-gray-600 mt-2">
-                  📍 {order.address}
-                </p>
-
-              </div>
-            ))}
+            </div>
 
           </div>
-        )}
-
-       
+        ))}
 
       </div>
-    </main>
-  );
+    )}
+
+  </div>
+
+</main>
+
+
+);
 }

@@ -2,28 +2,41 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
 from .views import (
-    ProductViewSet,
-    OrderViewSet,
-    OrderItemViewSet,
+ProductViewSet,
+OrderViewSet,
+OrderItemViewSet,
+register_user,
 )
 
 router = DefaultRouter()
 
 router.register(
-    "products",
-    ProductViewSet
+"products",
+ProductViewSet
 )
 
 router.register(
-    "orders",
-    OrderViewSet
+"orders",
+OrderViewSet
 )
 
 router.register(
-    "order-items",
-    OrderItemViewSet
+"order-items",
+OrderItemViewSet
 )
 
 urlpatterns = [
-    path("", include(router.urls)),
+path(
+"register/",
+register_user,
+name="register",
+),
+
+
+path(
+    "",
+    include(router.urls),
+),
+
+
 ]
