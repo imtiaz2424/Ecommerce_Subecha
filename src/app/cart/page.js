@@ -1,10 +1,13 @@
 "use client";
 
 import { useContext } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { CartContext } from "../../context/CartContext";
 
 export default function CartPage() {
+
+  const router = useRouter();
 
   const {
   cart,
@@ -19,6 +22,19 @@ export default function CartPage() {
     total + item.price * item.quantity,
   0
 );
+
+const handleCheckout = () => {
+  const token =
+    localStorage.getItem("access_token");
+
+  if (!token) {
+    alert("Please login first");
+    router.push("/login");
+    return;
+  }
+
+  router.push("/checkout");
+};
 
   return (
     <main className="min-h-screen bg-gray-100 py-16 px-6">
@@ -226,11 +242,12 @@ export default function CartPage() {
                   Clear Cart
                 </button>
 
-                <Link href="/checkout">
-                  <button className="w-full bg-green-600 text-white px-6 py-3 rounded-xl mt-4">
-                    Checkout
-                  </button>
-                </Link>
+                <button
+                  onClick={handleCheckout}
+                  className="w-full bg-green-600 text-white px-6 py-3 rounded-xl mt-4"
+                >
+                  Checkout
+                </button>
 
               </div>
 

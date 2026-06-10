@@ -4,30 +4,49 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 
 export default function OrdersPage() {
-const [orders, setOrders] = useState([]);
-const [loading, setLoading] = useState(true);
+const [orders, setOrders] =
+useState([]);
+
+const [loading, setLoading] =
+useState(true);
 
 useEffect(() => {
-fetch("http://127.0.0.1:8000/api/orders/")
-.then((res) => res.json())
-.then((data) => {
-setOrders(data);
-setLoading(false);
-})
-.catch((err) => {
-console.error(err);
-setLoading(false);
-});
+const userId =
+localStorage.getItem("user_id");
+
+
+fetch(
+  "http://127.0.0.1:8000/api/orders/"
+)
+  .then((res) => res.json())
+  .then((data) => {
+
+    const userOrders =
+      data.filter(
+        (order) =>
+          Number(order.user) ===
+          Number(userId)
+      );
+
+    setOrders(userOrders);
+    setLoading(false);
+  })
+  .catch((err) => {
+    console.error(err);
+    setLoading(false);
+  });
+
+
 }, []);
 
 return ( <main className="min-h-screen bg-gray-100 p-10">
 
-```
+
   <div className="max-w-5xl mx-auto">
 
     <Link
       href="/"
-      className="inline-block mb-10 mt-10 bg-black text-white px-6 py-3 rounded-2xl hover:bg-gray-800 transition"
+      className="inline-block mb-10 bg-black text-white px-6 py-3 rounded-2xl"
     >
       ← Back To Home
     </Link>
@@ -37,11 +56,15 @@ return ( <main className="min-h-screen bg-gray-100 p-10">
     </h1>
 
     {loading ? (
+
       <div className="bg-white p-8 rounded-3xl text-center">
         Loading Orders...
       </div>
+
     ) : orders.length === 0 ? (
+
       <div className="bg-white p-8 rounded-3xl text-center">
+
         <h2 className="text-2xl font-bold">
           No Orders Yet
         </h2>
@@ -52,11 +75,15 @@ return ( <main className="min-h-screen bg-gray-100 p-10">
         >
           Start Shopping
         </Link>
+
       </div>
+
     ) : (
+
       <div className="space-y-6">
 
         {orders.map((order) => (
+
           <div
             key={order.id}
             className="bg-white p-6 rounded-3xl shadow-lg"
@@ -78,20 +105,19 @@ return ( <main className="min-h-screen bg-gray-100 p-10">
 
             <div className="border-t pt-4">
 
-              <p className="text-lg font-semibold">
-                User ID: {order.user}
-              </p>
-
-              <p className="text-2xl font-black mt-2">
-                Total: ${order.total_price}
+              <p className="text-2xl font-black">
+                Total:
+                ${order.total_price}
               </p>
 
             </div>
 
           </div>
+
         ))}
 
       </div>
+
     )}
 
   </div>

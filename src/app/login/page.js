@@ -3,6 +3,7 @@
 import { useState, useContext } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { jwtDecode } from "jwt-decode";
 import { AuthContext } from "../../context/AuthContext";
 
 export default function LoginPage() {
@@ -64,6 +65,15 @@ const handleSubmit = async (e) => {
   localStorage.setItem(
     "refresh_token",
     data.refresh
+  );
+
+  const decoded = jwtDecode(data.access);
+
+  console.log(decoded);
+
+  localStorage.setItem(
+    "user_id",
+    decoded.user_id
   );
 
   login();

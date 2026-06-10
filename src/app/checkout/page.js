@@ -1,122 +1,159 @@
 "use client";
 
-import { useContext, useState, useEffect } from "react";
+import { useContext, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
+
 import { CartContext } from "../../context/CartContext";
 
 export default function CheckoutPage() {
-  const { cart, setCart } = useContext(CartContext);
+const router = useRouter();
 
-  const [address, setAddress] = useState("");
-  const [orders, setOrders] = useState([]);
+const { cart, clearCart } =
+useContext(CartContext);
 
-  // load previous orders
-  useEffect(() => {
-    const saved = localStorage.getItem("orders");
-    if (saved) {
-      setOrders(JSON.parse(saved));
-    }
-  }, []);
+const [address, setAddress] =
+useState("");
 
-  // total price
-  const total = cart.reduce(
-    (sum, item) => sum + item.price,
-    0
-  );
+const [loading, setLoading] =
+useState(false);
 
-  // place order
-  const handleOrder = () => {
-    if (!address) {
-      alert("Please enter address");
+const total = cart.reduce(
+(sum, item) =>
+sum +
+item.price *
+(item.quantity || 1),
+0
+);
+
+const userId =
+  localStorage.getItem("user_id");
+
+if (!userId) {
+  alert("Please login first");
+  router.push("/login");
+  return;
+}
+
+const handleOrder = async () => {
+  if (!address) {
+    alert("Please enter address");
+    return;
+  }
+
+  const userId =
+    localStorage.getItem("user_id");
+
+  try {
+    setLoading(true);
+
+    const response = await fetch(
+      "http://127.0.0.1:8000/api/orders/",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+        body: JSON.stringify({
+          user: Number(userId),
+          total_price: total,
+        }),
+      }
+    );
+
+    const order =
+      await response.json();
+
+    console.log(order);
+
+    if (!response.ok) {
+      alert("Order Failed");
       return;
     }
 
-    const newOrder = {
-      id: Date.now(),
-      items: cart,
-      total,
-      address,
-      date: new Date().toLocaleDateString(),
-    };
-
-    const updated = [...orders, newOrder];
-
-    setOrders(updated);
-
-    localStorage.setItem(
-      "orders",
-      JSON.stringify(updated)
+    alert(
+      "Order Placed Successfully"
     );
 
-    setCart([]);
+    clearCart();
 
-    localStorage.removeItem("cart");
+    router.push("/orders");
 
-    alert("Order Placed Successfully!");
-  };
+  } catch (error) {
+    console.error(error);
+    alert("Order Failed");
+  } finally {
+    setLoading(false);
+  }
+};
 
-  return (
-    <main className="min-h-screen bg-gray-100 p-10">
+return ( <main className="min-h-screen bg-gray-100 p-10">
 
-      <div className="max-w-4xl mx-auto bg-white p-8 rounded-3xl shadow-lg">
 
-        <h1 className="text-4xl font-black mb-6">
-          Checkout
-        </h1>
+  <div className="max-w-4xl mx-auto bg-white p-8 rounded-3xl shadow-lg">
 
-        {/* CART ITEMS */}
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold mb-4">
-            Cart Items
-          </h2>
+    <h1 className="text-4xl font-black mb-8">
+      Checkout
+    </h1>
 
-          {cart.length === 0 ? (
-            <p className="text-gray-500">
-              No items in cart
-            </p>
-          ) : (
-            cart.map((item, i) => (
-              <div
-                key={i}
-                className="flex justify-between border-b py-2"
-              >
-                <span>{item.name}</span>
-                <span>${item.price}</span>
-              </div>
-            ))
-          )}
+    <div className="space-y-3 mb-8">
+
+      {cart.map((item) => (
+        <div
+          key={item.id}
+          className="flex justify-between border-b pb-2"
+        >
+          <span>
+            {item.name}
+          </span>
+
+          <span>
+            $
+            {item.price *
+              (item.quantity || 1)}
+          </span>
         </div>
+      ))}
 
-        {/* TOTAL */}
-        <h2 className="text-2xl font-black mb-6">
-          Total: ${total}
-        </h2>
+    </div>
 
-        {/* ADDRESS */}
-        <textarea
-          placeholder="Enter your address..."
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-          className="w-full border p-4 rounded-xl mb-6"
-        />
+    <div className="text-3xl font-black mb-6">
+      Total: ${total}
+    </div>
 
-        {/* BUTTON */}
-        <button
-          onClick={handleOrder}
-          className="bg-black text-white w-full py-4 rounded-2xl text-xl font-bold"
-        >
-          Place Order
-        </button>
+    <textarea
+      value={address}
+      onChange={(e) =>
+        setAddress(
+          e.target.value
+        )
+      }
+      placeholder="Enter your address"
+      className="w-full border p-4 rounded-xl mb-6"
+    />
 
-        {/* BACK */}
-        <Link
-          href="/cart"
-          className="block text-center mt-4 text-violet-600"
-        >
-          ← Back to Cart
-        </Link>
+    <button
+      onClick={handleOrder}
+      disabled={loading}
+      className="w-full bg-black text-white py-4 rounded-xl"
+    >
+      {loading
+        ? "Processing..."
+        : "Place Order"}
+    </button>
 
-      </div>
-    </main>
-  );
+    <Link
+      href="/cart"
+      className="block text-center mt-5 text-blue-600"
+    >
+      Back To Cart
+    </Link>
+
+  </div>
+
+</main>
+
+
+);
 }
