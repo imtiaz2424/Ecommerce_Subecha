@@ -18,17 +18,22 @@ password: "",
 const [loading, setLoading] = useState(false);
 
 const handleChange = (e) => {
-setForm({
-form,
-[e.target.name]: e.target.value,
-});
+const { name, value } = e.target;
+
+setForm((prev) => ({
+...prev,
+[name]: value,
+}));
 };
 
+
+
 const handleSubmit = async (e) => {
-e.preventDefault();
+  e.preventDefault();
 
+  console.log("FORM DATA:", form);
 
-try {
+  try {
   setLoading(true);
 
   const response = await fetch(
@@ -44,7 +49,7 @@ try {
 
   const data = await response.json();
 
-  console.log(data);
+  console.log("API RESPONSE:", data);
 
   if (!response.ok) {
     alert("Invalid Username or Password");
