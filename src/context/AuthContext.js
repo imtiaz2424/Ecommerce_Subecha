@@ -1,8 +1,9 @@
 "use client";
 
-import { createContext, useEffect, useState } from "react";
+import {createContext, useState, useEffect, } from "react";
 
-export const AuthContext = createContext();
+export const AuthContext =
+createContext();
 
 export default function AuthProvider({
 children,
@@ -17,9 +18,7 @@ localStorage.getItem(
 );
 
 
-if (token) {
-  setIsLoggedIn(true);
-}
+setIsLoggedIn(!!token);
 
 
 }, []);
@@ -38,6 +37,10 @@ localStorage.removeItem(
   "refresh_token"
 );
 
+localStorage.removeItem(
+  "user_id"
+);
+
 setIsLoggedIn(false);
 
 
@@ -45,11 +48,7 @@ setIsLoggedIn(false);
 
 return (
 <AuthContext.Provider
-value={{
-isLoggedIn,
-login,
-logout,
-}}
+value={{ isLoggedIn, login, logout, }}
 >
 {children}
 </AuthContext.Provider>

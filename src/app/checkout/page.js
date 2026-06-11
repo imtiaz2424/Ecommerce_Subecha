@@ -3,6 +3,7 @@
 import { useContext, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { AuthContext } from "../../context/AuthContext";
 
 import { CartContext } from "../../context/CartContext";
 
@@ -109,6 +110,33 @@ const handleOrder = async () => {
     setLoading(false);
   }
 };
+
+
+const { isLoggedIn } =
+  useContext(AuthContext);
+
+  if (!isLoggedIn) {
+  return (
+    <main className="min-h-screen flex items-center justify-center">
+
+      <div className="bg-white p-10 rounded-3xl shadow-lg text-center">
+
+        <h1 className="text-3xl font-black mb-5">
+          Login Required
+        </h1>
+
+        <Link
+          href="/login"
+          className="bg-black text-white px-6 py-3 rounded-xl"
+        >
+          Go To Login
+        </Link>
+
+      </div>
+
+    </main>
+  );
+}
 
 return ( <main className="min-h-screen bg-gray-100 p-10">
 
