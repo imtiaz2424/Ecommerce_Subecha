@@ -64,8 +64,30 @@ const handleOrder = async () => {
 
     const order =
       await response.json();
-
+      
     console.log(order);
+    for (const item of cart) {
+
+      await fetch(
+      "http://127.0.0.1:8000/api/order-items/",
+      {
+      method: "POST",
+      headers: {
+      "Content-Type":
+      "application/json",
+      },
+      body: JSON.stringify({
+      order: order.id,
+      product_name: item.name,
+      price: item.price,
+      quantity:
+      item.quantity || 1,
+      }),
+      }
+      );
+
+      }
+
 
     if (!response.ok) {
       alert("Order Failed");

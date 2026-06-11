@@ -91,9 +91,12 @@ return ( <main className="min-h-screen bg-gray-100 p-10">
 
             <div className="flex justify-between mb-4">
 
-              <p className="font-bold">
+              <Link
+                href={`/orders/${order.id}`}
+                className="font-bold text-blue-600"
+              >
                 Order ID: #{order.id}
-              </p>
+              </Link>
 
               <p className="text-gray-500">
                 {new Date(
