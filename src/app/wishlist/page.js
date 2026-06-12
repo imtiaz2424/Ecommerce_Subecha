@@ -1,14 +1,9 @@
 "use client";
 
-import {
-  useContext,
-} from "react";
-
+import { useContext, } from "react";
 import Link from "next/link";
-
-import {
-  WishlistContext,
-} from "../../context/WishlistContext";
+import { WishlistContext, } from "../../context/WishlistContext";
+import ProtectedRoute from "../../components/ProtectedRoute";
 
 export default function WishlistPage() {
 
@@ -19,6 +14,7 @@ export default function WishlistPage() {
   );
 
   return (
+    <ProtectedRoute>
     <main className="min-h-screen bg-gray-100 p-8">
       
       <div className="max-w-7xl mx-auto">
@@ -91,5 +87,6 @@ export default function WishlistPage() {
       </div>
 
     </main>
+    </ProtectedRoute>
   );
 }

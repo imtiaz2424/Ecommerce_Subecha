@@ -2,8 +2,8 @@
 
 import { useEffect, useState, useContext } from "react";
 import Link from "next/link";
-
 import { AuthContext } from "../../context/AuthContext";
+import ProtectedRoute from "../../components/ProtectedRoute";
 
 export default function OrdersPage() {
 const [orders, setOrders] =
@@ -14,6 +14,7 @@ const { isLoggedIn } =
 
   if (!isLoggedIn) {
   return (
+    <ProtectedRoute>
     <main className="min-h-screen flex items-center justify-center">
 
       <div className="bg-white p-10 rounded-3xl shadow-lg text-center">
@@ -32,42 +33,34 @@ const { isLoggedIn } =
       </div>
 
     </main>
+    </ProtectedRoute>
   );
 }
 
 const [loading, setLoading] =
 useState(true);
 
-useEffect(() => {
-const userId =
-localStorage.getItem("user_id");
+uuseEffect(() => {
+  const userId =
+    localStorage.getItem("user_id");
 
-
-fetch(
-  "http://127.0.0.1:8000/api/orders/"
-)
-  .then((res) => res.json())
-  .then((data) => {
-
-    const userOrders =
-      data.filter(
-        (order) =>
-          Number(order.user) ===
-          Number(userId)
-      );
-
-    setOrders(userOrders);
-    setLoading(false);
-  })
-  .catch((err) => {
-    console.error(err);
-    setLoading(false);
-  });
-
-
+  fetch(
+    `http://127.0.0.1:8000/api/orders/?user=${userId}`
+  )
+    .then((res) => res.json())
+    .then((data) => {
+      setOrders(data);
+      setLoading(false);
+    })
+    .catch((err) => {
+      console.error(err);
+      setLoading(false);
+    });
 }, []);
 
-return ( <main className="min-h-screen bg-gray-100 p-10">
+return ( 
+  <ProtectedRoute>
+<main className="min-h-screen bg-gray-100 p-10">
 
 
   <div className="max-w-5xl mx-auto">
@@ -154,6 +147,7 @@ return ( <main className="min-h-screen bg-gray-100 p-10">
   </div>
 
 </main>
+</ProtectedRoute>
 
 
 );

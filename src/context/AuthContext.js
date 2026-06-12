@@ -1,56 +1,101 @@
 "use client";
 
-import {createContext, useState, useEffect, } from "react";
+import {
+  createContext,
+  useState,
+  useEffect,
+} from "react";
 
 export const AuthContext =
-createContext();
+  createContext();
 
 export default function AuthProvider({
-children,
+  children,
 }) {
-const [isLoggedIn, setIsLoggedIn] =
-useState(false);
+  const [isLoggedIn, setIsLoggedIn] =
+    useState(false);
 
-useEffect(() => {
-const token =
-localStorage.getItem(
-"access_token"
-);
+  const [user, setUser] =
+    useState(null);
 
+  useEffect(() => {
+    const token =
+      localStorage.getItem(
+        "access_token"
+      );
 
-setIsLoggedIn(!!token);
+    const userId =
+      localStorage.getItem(
+        "user_id"
+      );
 
+    if (token) {
+      setIsLoggedIn(true);
 
-}, []);
+      if (userId) {
+        fetch(
+          `http://127.0.0.1:8000/api/profile/${userId}/`
+        )
+          .then((res) => res.json())
+          .then((data) => {
+            setUser(data);
+          })
+          .catch((err) =>
+            console.error(err)
+          );
+      }
+    }
+  }, []);
 
-const login = () => {
-setIsLoggedIn(true);
-};
+  const login = () => {
+    setIsLoggedIn(true);
 
-const logout = () => {
-localStorage.removeItem(
-"access_token"
-);
+    const userId =
+      localStorage.getItem(
+        "user_id"
+      );
 
+    if (userId) {
+      fetch(
+        `http://127.0.0.1:8000/api/profile/${userId}/`
+      )
+        .then((res) => res.json())
+        .then((data) => {
+          setUser(data);
+        })
+        .catch((err) =>
+          console.error(err)
+        );
+    }
+  };
 
-localStorage.removeItem(
-  "refresh_token"
-);
+  const logout = () => {
+    localStorage.removeItem(
+      "access_token"
+    );
 
-localStorage.removeItem(
-  "user_id"
-);
+    localStorage.removeItem(
+      "refresh_token"
+    );
 
-setIsLoggedIn(false);
+    localStorage.removeItem(
+      "user_id"
+    );
 
+    setUser(null);
+    setIsLoggedIn(false);
+  };
 
-};
-
-return (
-<AuthContext.Provider
-value={{ isLoggedIn, login, logout, }}
->
-{children}
-</AuthContext.Provider>
-);
+  return (
+    <AuthContext.Provider
+      value={{
+        isLoggedIn,
+        user,
+        login,
+        logout,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 }

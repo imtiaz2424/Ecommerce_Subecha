@@ -4,8 +4,8 @@ import { useContext, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { AuthContext } from "../../context/AuthContext";
-
 import { CartContext } from "../../context/CartContext";
+import ProtectedRoute from "../../components/ProtectedRoute";
 
 export default function CheckoutPage() {
 const router = useRouter();
@@ -117,6 +117,7 @@ const { isLoggedIn } =
 
   if (!isLoggedIn) {
   return (
+    <ProtectedRoute>
     <main className="min-h-screen flex items-center justify-center">
 
       <div className="bg-white p-10 rounded-3xl shadow-lg text-center">
@@ -135,10 +136,13 @@ const { isLoggedIn } =
       </div>
 
     </main>
+    </ProtectedRoute>
   );
 }
 
-return ( <main className="min-h-screen bg-gray-100 p-10">
+return ( 
+  <ProtectedRoute>
+<main className="min-h-screen bg-gray-100 p-10">
 
 
   <div className="max-w-4xl mx-auto bg-white p-8 rounded-3xl shadow-lg">
@@ -203,6 +207,7 @@ return ( <main className="min-h-screen bg-gray-100 p-10">
   </div>
 
 </main>
+</ProtectedRoute>
 
 
 );

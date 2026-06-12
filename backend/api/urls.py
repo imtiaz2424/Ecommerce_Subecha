@@ -6,6 +6,7 @@ ProductViewSet,
 OrderViewSet,
 OrderItemViewSet,
 register_user,
+profile,
 )
 
 router = DefaultRouter()
@@ -25,6 +26,12 @@ name="register",
 path(
     "",
     include(router.urls),
+),
+
+path(
+    "profile/<int:user_id>/",
+    profile,
+    name="profile",
 ),
 
 

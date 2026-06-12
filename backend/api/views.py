@@ -25,6 +25,18 @@ class OrderViewSet(viewsets.ModelViewSet):
     serializer_class = OrderSerializer
     permission_classes = [AllowAny]
 
+    def get_queryset(self):
+        user_id = self.request.query_params.get(
+            "user"
+        )
+
+        if user_id:
+            return Order.objects.filter(
+                user_id=user_id
+            )
+
+        return Order.objects.all()
+
 
 class OrderItemViewSet(viewsets.ModelViewSet):
     queryset = OrderItem.objects.all()
@@ -71,3 +83,23 @@ def register_user(request):
         },
         status=status.HTTP_201_CREATED,
     )
+
+
+
+
+@api_view(["GET"])
+def profile(request, user_id):
+    try:
+        user = User.objects.get(id=user_id)
+
+        return Response({
+            "id": user.id,
+            "username": user.username,
+            "email": user.email,
+        })
+
+    except User.DoesNotExist:
+        return Response(
+            {"error": "User not found"},
+            status=404,
+        )

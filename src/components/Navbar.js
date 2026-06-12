@@ -7,7 +7,7 @@ import { AuthContext } from "../context/AuthContext";
 
 export default function Navbar() {
   const { cart } = useContext(CartContext);
-  const { user } = useContext(AuthContext);
+  const { user, logout } = useContext(AuthContext);
 
   return (
     <nav className="sticky top-0 z-50 backdrop-blur-xl bg-white/80 border-b border-gray-200">
@@ -50,17 +50,31 @@ export default function Navbar() {
           </Link>
 
           {user ? (
-            <Link href="/profile">
-              Profile
-            </Link>
-          ) : (
-            <Link
-              href="/login"
-              className="bg-violet-600 text-white px-6 py-3 rounded-2xl"
-            >
-              Login
-            </Link>
-          )}
+                <div className="flex items-center gap-4">
+
+                  <Link
+                    href="/profile"
+                    className="text-violet-600 font-bold"
+                  >
+                    {user.username}
+                  </Link>
+
+                  <button
+                    onClick={logout}
+                    className="bg-red-500 text-white px-4 py-2 rounded-xl"
+                  >
+                    Logout
+                  </button>
+
+                </div>
+              ) : (
+                <Link
+                  href="/login"
+                  className="bg-violet-600 text-white px-6 py-3 rounded-2xl"
+                >
+                  Login
+                </Link>
+              )}
 
         </div>
 
