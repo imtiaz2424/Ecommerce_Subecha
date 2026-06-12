@@ -3,212 +3,186 @@
 import { useContext, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { AuthContext } from "../../context/AuthContext";
+
 import { CartContext } from "../../context/CartContext";
 import ProtectedRoute from "../../components/ProtectedRoute";
 
 export default function CheckoutPage() {
-const router = useRouter();
+  const router = useRouter();
 
-const { cart, clearCart } =
-useContext(CartContext);
+  const { cart, clearCart } =
+    useContext(CartContext);
 
-const [address, setAddress] =
-useState("");
+  const [address, setAddress] =
+    useState("");
 
-const [loading, setLoading] =
-useState(false);
+  const [loading, setLoading] =
+    useState(false);
 
-const total = cart.reduce(
-(sum, item) =>
-sum +
-item.price *
-(item.quantity || 1),
-0
-);
+  const total = cart.reduce(
+    (sum, item) =>
+      sum +
+      item.price *
+        (item.quantity || 1),
+    0
+  );
 
-const userId =
-  localStorage.getItem("user_id");
-
-if (!userId) {
-  alert("Please login first");
-  router.push("/login");
-  return;
-}
-
-const handleOrder = async () => {
-  if (!address) {
-    alert("Please enter address");
-    return;
-  }
-
-  const userId =
-    localStorage.getItem("user_id");
-
-  try {
-    setLoading(true);
-
-    const response = await fetch(
-      "http://127.0.0.1:8000/api/orders/",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type":
-            "application/json",
-        },
-        body: JSON.stringify({
-          user: Number(userId),
-          total_price: total,
-        }),
-      }
-    );
-
-    const order =
-      await response.json();
-      
-    console.log(order);
-    for (const item of cart) {
-
-      await fetch(
-      "http://127.0.0.1:8000/api/order-items/",
-      {
-      method: "POST",
-      headers: {
-      "Content-Type":
-      "application/json",
-      },
-      body: JSON.stringify({
-      order: order.id,
-      product_name: item.name,
-      price: item.price,
-      quantity:
-      item.quantity || 1,
-      }),
-      }
-      );
-
-      }
-
-
-    if (!response.ok) {
-      alert("Order Failed");
+  const handleOrder = async () => {
+    if (!address) {
+      alert("Please enter address");
       return;
     }
 
-    alert(
-      "Order Placed Successfully"
-    );
+    const userId =
+      localStorage.getItem("user_id");
 
-    clearCart();
+    if (!userId) {
+      alert("Please login first");
+      router.push("/login");
+      return;
+    }
 
-    router.push("/orders");
+    try {
+      setLoading(true);
 
-  } catch (error) {
-    console.error(error);
-    alert("Order Failed");
-  } finally {
-    setLoading(false);
-  }
-};
+      const response = await fetch(
+        "http://127.0.0.1:8000/api/orders/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            user: Number(userId),
+            total_price: total,
+          }),
+        }
+      );
 
+      const order =
+        await response.json();
 
-const { isLoggedIn } =
-  useContext(AuthContext);
+      if (!response.ok) {
+        alert("Order Failed");
+        return;
+      }
 
-  if (!isLoggedIn) {
+      console.log("Order:", order);
+
+      for (const item of cart) {
+        await fetch(
+          "http://127.0.0.1:8000/api/order-items/",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+            body: JSON.stringify({
+              order: order.id,
+              product_name:
+                item.name,
+              price: item.price,
+              quantity:
+                item.quantity || 1,
+            }),
+          }
+        );
+      }
+
+      alert(
+        "Order Placed Successfully"
+      );
+
+      clearCart();
+
+      router.push("/orders");
+    } catch (error) {
+      console.error(error);
+
+      alert("Order Failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <ProtectedRoute>
-    <main className="min-h-screen flex items-center justify-center">
+      <main className="min-h-screen bg-gray-100 p-10">
 
-      <div className="bg-white p-10 rounded-3xl shadow-lg text-center">
+        <div className="max-w-4xl mx-auto bg-white p-8 rounded-3xl shadow-lg">
 
-        <h1 className="text-3xl font-black mb-5">
-          Login Required
-        </h1>
+          <h1 className="text-4xl font-black mb-8">
+            Checkout
+          </h1>
 
-        <Link
-          href="/login"
-          className="bg-black text-white px-6 py-3 rounded-xl"
-        >
-          Go To Login
-        </Link>
+          <div className="space-y-3 mb-8">
 
-      </div>
+            {cart.length === 0 ? (
+              <p className="text-gray-500">
+                No items in cart
+              </p>
+            ) : (
+              cart.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex justify-between border-b pb-2"
+                >
+                  <span>
+                    {item.name}
+                  </span>
 
-    </main>
+                  <span>
+                    $
+                    {item.price *
+                      (item.quantity ||
+                        1)}
+                  </span>
+                </div>
+              ))
+            )}
+
+          </div>
+
+          <div className="text-3xl font-black mb-6">
+            Total: ${total}
+          </div>
+
+          <textarea
+            value={address}
+            onChange={(e) =>
+              setAddress(
+                e.target.value
+              )
+            }
+            placeholder="Enter your address"
+            className="w-full border p-4 rounded-xl mb-6"
+          />
+
+          <button
+            onClick={handleOrder}
+            disabled={
+              loading ||
+              cart.length === 0
+            }
+            className="w-full bg-black text-white py-4 rounded-xl"
+          >
+            {loading
+              ? "Processing..."
+              : "Place Order"}
+          </button>
+
+          <Link
+            href="/cart"
+            className="block text-center mt-5 text-blue-600"
+          >
+            Back To Cart
+          </Link>
+
+        </div>
+
+      </main>
     </ProtectedRoute>
   );
-}
-
-return ( 
-  <ProtectedRoute>
-<main className="min-h-screen bg-gray-100 p-10">
-
-
-  <div className="max-w-4xl mx-auto bg-white p-8 rounded-3xl shadow-lg">
-
-    <h1 className="text-4xl font-black mb-8">
-      Checkout
-    </h1>
-
-    <div className="space-y-3 mb-8">
-
-      {cart.map((item) => (
-        <div
-          key={item.id}
-          className="flex justify-between border-b pb-2"
-        >
-          <span>
-            {item.name}
-          </span>
-
-          <span>
-            $
-            {item.price *
-              (item.quantity || 1)}
-          </span>
-        </div>
-      ))}
-
-    </div>
-
-    <div className="text-3xl font-black mb-6">
-      Total: ${total}
-    </div>
-
-    <textarea
-      value={address}
-      onChange={(e) =>
-        setAddress(
-          e.target.value
-        )
-      }
-      placeholder="Enter your address"
-      className="w-full border p-4 rounded-xl mb-6"
-    />
-
-    <button
-      onClick={handleOrder}
-      disabled={loading}
-      className="w-full bg-black text-white py-4 rounded-xl"
-    >
-      {loading
-        ? "Processing..."
-        : "Place Order"}
-    </button>
-
-    <Link
-      href="/cart"
-      className="block text-center mt-5 text-blue-600"
-    >
-      Back To Cart
-    </Link>
-
-  </div>
-
-</main>
-</ProtectedRoute>
-
-
-);
 }

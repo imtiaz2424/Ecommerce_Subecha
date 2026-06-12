@@ -16,23 +16,22 @@ router.register("orders", OrderViewSet)
 router.register("order-items", OrderItemViewSet)
 
 urlpatterns = [
-path(
-"register/",
-register_user,
-name="register",
-),
 
+    path(
+        "register/",
+        register_user,
+        name="register",
+    ),
 
-path(
-    "",
-    include(router.urls),
-),
+    path(
+        "profile/<int:user_id>/",
+        profile,
+        name="profile",
+    ),
 
-path(
-    "profile/<int:user_id>/",
-    profile,
-    name="profile",
-),
-
+    path(
+        "",
+        include(router.urls),
+    ),
 
 ]

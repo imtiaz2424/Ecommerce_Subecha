@@ -16,10 +16,10 @@ password: "",
 const [loading, setLoading] = useState(false);
 
 const handleChange = (e) => {
-setForm({
-form,
-[e.target.name]: e.target.value,
-});
+  setForm((prev) => ({
+    ...prev,
+    [e.target.name]: e.target.value,
+  }));
 };
 
 const handleSubmit = async (e) => {
