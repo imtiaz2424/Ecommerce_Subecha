@@ -72,10 +72,45 @@ export default function WishlistProvider({
     <WishlistContext.Provider
       value={{
         wishlist,
-        toggleWishlist,
+        setWishlist,
       }}
     >
       {children}
     </WishlistContext.Provider>
   );
 }
+
+
+const addToWishlist = async (
+  product
+) => {
+
+  const userId =
+    localStorage.getItem(
+      "user_id"
+    );
+
+  if (!userId) {
+    alert("Login First");
+    return;
+  }
+
+  await fetch(
+    "http://127.0.0.1:8000/api/wishlist/",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type":
+          "application/json",
+      },
+      body: JSON.stringify({
+        user: Number(userId),
+        product: product.id,
+      }),
+    }
+  );
+
+  alert(
+    "Added To Wishlist ❤️"
+  );
+};

@@ -12,18 +12,18 @@ from .models import (
     Product,
     Order,
     OrderItem,
+    Wishlist,
 )
 
 from .serializers import (
     ProductSerializer,
     OrderSerializer,
     OrderItemSerializer,
+    WishlistSerializer,
 )
 
 
-class ProductViewSet(
-    viewsets.ModelViewSet
-):
+class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
 
     serializer_class = (
@@ -35,9 +35,9 @@ class ProductViewSet(
     ]
 
 
-class OrderViewSet(
-    viewsets.ModelViewSet
-):
+class OrderViewSet(viewsets.ModelViewSet):
+    queryset = Order.objects.all()
+
     serializer_class = (
         OrderSerializer
     )
@@ -61,9 +61,9 @@ class OrderViewSet(
         return Order.objects.all()
 
 
-class OrderItemViewSet(
-    viewsets.ModelViewSet
-):
+class OrderItemViewSet(viewsets.ModelViewSet):
+    queryset = OrderItem.objects.all()
+
     serializer_class = (
         OrderItemSerializer
     )
@@ -86,6 +86,28 @@ class OrderItemViewSet(
 
         return OrderItem.objects.all()
 
+class WishlistViewSet(viewsets.ModelViewSet):
+    serializer_class = (
+        WishlistSerializer
+    )
+
+    permission_classes = [
+        AllowAny
+    ]
+
+    def get_queryset(self):
+        user_id = (
+            self.request.query_params.get(
+                "user"
+            )
+        )
+
+        if user_id:
+            return Wishlist.objects.filter(
+                user_id=user_id
+            )
+
+        return Wishlist.objects.all()
 
 @api_view(["POST"])
 def register_user(request):

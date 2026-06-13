@@ -13,6 +13,20 @@ export default function WishlistPage() {
     WishlistContext
   );
 
+
+  const userId =
+  localStorage.getItem(
+    "user_id"
+  );
+
+fetch(
+  `http://127.0.0.1:8000/api/wishlist/?user=${userId}`
+)
+  .then((res) => res.json())
+  .then((data) => {
+    setWishlist(data);
+  });
+
   return (
     <ProtectedRoute>
     <main className="min-h-screen bg-gray-100 p-8">

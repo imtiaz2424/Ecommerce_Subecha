@@ -5,6 +5,7 @@ from .views import (
 ProductViewSet,
 OrderViewSet,
 OrderItemViewSet,
+WishlistViewSet,
 register_user,
 profile,
 )
@@ -14,6 +15,9 @@ router = DefaultRouter()
 router.register("products", ProductViewSet)
 router.register("orders", OrderViewSet)
 router.register("order-items", OrderItemViewSet)
+router.register("wishlist", WishlistViewSet,
+    basename="wishlist"
+)
 
 urlpatterns = [
 

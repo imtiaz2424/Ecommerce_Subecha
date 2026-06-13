@@ -1,23 +1,15 @@
 "use client";
 
-import {
-  useEffect,
-  useState,
-} from "react";
-
+import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-
 import ProtectedRoute from "../../../components/ProtectedRoute";
 
 export default function OrderDetailsPage() {
   const params = useParams();
 
-  const [items, setItems] =
-    useState([]);
-
-  const [loading, setLoading] =
-    useState(true);
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch(
@@ -28,15 +20,14 @@ export default function OrderDetailsPage() {
         setItems(data);
         setLoading(false);
       })
-      .catch((error) => {
-        console.error(error);
+      .catch((err) => {
+        console.error(err);
         setLoading(false);
       });
   }, [params.id]);
 
   return (
     <ProtectedRoute>
-
       <main className="min-h-screen bg-gray-100 p-10">
 
         <div className="max-w-5xl mx-auto">
@@ -53,54 +44,46 @@ export default function OrderDetailsPage() {
           </h1>
 
           {loading ? (
-
-            <div className="bg-white p-8 rounded-3xl text-center">
+            <div className="bg-white p-8 rounded-3xl">
               Loading...
             </div>
-
           ) : items.length === 0 ? (
-
-            <div className="bg-white p-8 rounded-3xl text-center">
-              No Products Found
+            <div className="bg-white p-8 rounded-3xl">
+              No Items Found
             </div>
-
           ) : (
-
-            <div className="space-y-5">
+            <div className="space-y-4">
 
               {items.map((item) => (
-
                 <div
                   key={item.id}
-                  className="bg-white p-6 rounded-3xl shadow-lg"
+                  className="bg-white p-6 rounded-3xl shadow"
                 >
-
-                  <h2 className="text-2xl font-bold">
+                  <h2 className="text-xl font-bold">
                     {item.product_name}
                   </h2>
 
-                  <p className="text-gray-500 mt-2">
-                    Quantity:
-                    {" "}
-                    {item.quantity}
+                  <p>
+                    Price: ${item.price}
                   </p>
 
-                  <p className="text-2xl font-black mt-3">
-                    ৳{item.price}
+                  <p>
+                    Quantity: {item.quantity}
                   </p>
 
+                  <p className="font-bold mt-2">
+                    Total: $
+                    {item.price * item.quantity}
+                  </p>
                 </div>
-
               ))}
 
             </div>
-
           )}
 
         </div>
 
       </main>
-
     </ProtectedRoute>
   );
 }
